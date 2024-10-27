@@ -52,13 +52,12 @@ public class Main {
         }
 
         //Sayılarla İşlemler
-        String islemTuru = "";
         while (true) {//Sürekli olması için
             System.out.println("Lütfen işlem türünü seçin (+, -, *, /) veya çıkmak için 'escape' yazın:");
-            islemTuru = scan.next();
+            String islemTuru = scan.next();
             //operatörü alıp küçük harflere çeviriyoruz ki büyük harflerle yazan olursa sorun çıkmasın
 
-            if (islemTuru.equals("+")||islemTuru.equals("-")||islemTuru.equals("*")||islemTuru.equals("/")){
+            if (islemTuru.equals("+")||islemTuru.equals("-")||islemTuru.equals("*")||islemTuru.equals("/")||islemTuru.equals("escape")){
             //İşlem türünün doğru olup olmadığını kontrol eder
             if (islemTuru.equals("escape")) {
             //Eğer "escape" yazılırsa çıması için
@@ -69,7 +68,7 @@ public class Main {
                 int sayiAdedi = scan.nextInt();
                 //Sayı adedini alır
                 if (sayiAdedi<2){
-                    System.out.println("En az iki sayı ileişlem yapılabilir");
+                    System.out.println("En az iki sayı ile işlem yapılabilir");
                     break;
                     //Bir sayı varsa işlem iptal edilir
                 }else {
