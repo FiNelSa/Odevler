@@ -15,6 +15,15 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -39,6 +48,19 @@ public class Robot extends TimedRobot {
   private double startTime;
 
   private final double kDriveTick2Feet = 1.0 / 4096 * 6* Math.PI/ 12;
+
+  Pose3d poseA = new Pose3d();
+  Pose3d poseB = new Pose3d();
+
+  StructPublisher<Pose3d> publisher = NetworkTableInstance.getDefault()
+    .getStructTopic("MyPose", Pose3d.struct).publish();
+  StructArrayPublisher<Pose3d> arrayPublisher = NetworkTableInstance.getDefault()
+    .getStructArrayTopic("MyPoseArray", Pose3d.struct).publish();
+
+  void periodic() {
+    publisher.set(poseA);
+    arrayPublisher.set(new Pose3d[] {poseA, poseB});
+  }
 
   @Override
   public void robotInit() {
@@ -91,7 +113,7 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     double speed = -joy1.getRawAxis(1)*0.6;
     double turn = joy1.getRawAxis(4)*0.3;
-    /* 
+  
     if(Math.abs(speed) < 0.05){
       speed = 0;
     }
@@ -99,7 +121,7 @@ public class Robot extends TimedRobot {
     if(Math.abs(turn) < 0.05){
       turn = 0;
     }
-    */
+   
     drive.arcadeDrive(speed, turn);
   }
 
