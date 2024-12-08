@@ -7,7 +7,7 @@ public class Main {
         Random rand = new Random();
 
         //1
-/*
+
         String[] names1 = {"Semih", "Ufuk", "Efe", "Toprak", "Sarp", "Çağan", "İrem", "Ezel", "Burak", "Sipan"};
         ArrayList<String> names = new ArrayList<>(Arrays.asList(names1));
 
@@ -55,7 +55,7 @@ public class Main {
         int avrg = numbers.get(0)/(numbers.size());
         System.out.println("Ortalama : " + avrg);
 
-*/
+
         //3
 
         ArrayList<Integer> numbers2= new ArrayList<>();
