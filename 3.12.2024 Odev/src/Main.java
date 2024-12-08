@@ -1,4 +1,3 @@
-import java.sql.Array;
 import java.util.*;
 
 
@@ -8,7 +7,7 @@ public class Main {
         Random rand = new Random();
 
         //1
-
+/*
         String[] names1 = {"Semih", "Ufuk", "Efe", "Toprak", "Sarp", "Çağan", "İrem", "Ezel", "Burak", "Sipan"};
         ArrayList<String> names = new ArrayList<>(Arrays.asList(names1));
 
@@ -56,7 +55,7 @@ public class Main {
         int avrg = numbers.get(0)/(numbers.size());
         System.out.println("Ortalama : " + avrg);
 
-
+*/
         //3
 
         ArrayList<Integer> numbers2= new ArrayList<>();
@@ -67,7 +66,16 @@ public class Main {
             numbers2.add(ii);
         }
 
-        Collections.sort(numbers2);
+        for (int i= 1; i< 15; i++){
+            for (int ii= 0; ii< i; ii++){
+                if (numbers2.get(i)< numbers2.get(ii)){
+                    int j = numbers2.get(i);
+                    numbers2.set(i, numbers2.get(ii));
+                    numbers2.set(ii, j);
+                }
+            }
+        }
+
         System.out.println("Küçükten Büyüğe : " + numbers2);
     }
 }

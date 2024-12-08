@@ -20,8 +20,7 @@ public class Main {
 
         //Dairenin Alanı ve Çapı
         int r = scan.nextInt();
-        int p = 3;
-        System.out.println((r^2)*p);
-        System.out.println(r*2*p);
+        System.out.println(r*r*Math.PI);
+        System.out.println(r*2*Math.PI);
     }
 }
