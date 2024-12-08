@@ -63,9 +63,9 @@ public class Main {
 
         for(int i = 0; i<15; i++){
             int ii = rand.nextInt(0, 100);
-            System.out.print(ii + " ");
             numbers2.add(ii);
         }
+        System.out.println(numbers2);
 
         for (int i= 1; i< 15; i++){
             for (int ii= 0; ii< i; ii++){
