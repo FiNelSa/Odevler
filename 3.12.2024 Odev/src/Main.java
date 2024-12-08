@@ -6,6 +6,7 @@ public class Main {
         Scanner scan = new Scanner(System.in);
         Random rand = new Random();
 
+
         //1
 
         String[] names1 = {"Semih", "Ufuk", "Efe", "Toprak", "Sarp", "Çağan", "İrem", "Ezel", "Burak", "Sipan"};
@@ -21,8 +22,8 @@ public class Main {
         System.out.print("Yeni isim : ");
         names.set(change, scan.next());
 
-        for (int i = 0; i< names.size(); i++){
-            System.out.println(names.get(i).toUpperCase());
+        for (String name : names) {
+            System.out.println(name.toUpperCase());
         }
 
         System.out.println("Hangi ismi çıkarmak istiyosunuz?");
@@ -30,8 +31,8 @@ public class Main {
         System.out.println("Sileceğiniz isim : " + names.get(delete).toUpperCase());
         names.remove(delete);
 
-        for (int i = 0; i< names.size(); i++){
-            System.out.println(names.get(i).toUpperCase());
+        for (String name : names) {
+            System.out.println(name.toUpperCase());
         }
 
 
@@ -48,11 +49,11 @@ public class Main {
         numbers.add(number3);
 
         for (int i = 1;i < numbers.size(); i++){
-            numbers.set(0, numbers.get(0)+numbers.get(i));
+            numbers.set(0, numbers.getFirst()+numbers.get(i));
         }
-        System.out.println("Toplam : " + numbers.get(0));
+        System.out.println("Toplam : " + numbers.getFirst());
 
-        int avrg = numbers.get(0)/(numbers.size());
+        int avrg = numbers.getFirst()/(numbers.size());
         System.out.println("Ortalama : " + avrg);
 
 
