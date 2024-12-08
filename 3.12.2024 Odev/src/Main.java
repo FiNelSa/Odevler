@@ -68,9 +68,9 @@ public class Main {
         }
         System.out.println(numbers2);
 
-        for (int i= 1; i< 15; i++){
-            for (int ii= 0; ii< i; ii++){
-                if (numbers2.get(i)< numbers2.get(ii)){
+        for (int i = 1; i < numbers2.size(); i++){
+            for (int ii = 0; ii < i; ii++){
+                if (numbers2.get(i) < numbers2.get(ii)){
                     int iii = numbers2.get(i);
                     numbers2.set(i, numbers2.get(ii));
                     numbers2.set(ii, iii);
