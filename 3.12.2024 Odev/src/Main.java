@@ -60,22 +60,23 @@ public class Main {
 
         ArrayList<Integer> numbers2= new ArrayList<>();
         System.out.println("Rastgele 15 sayı : ");
+
         for(int i = 0; i<15; i++){
             int ii = rand.nextInt(0, 100);
-            System.out.println(ii);
+            System.out.print(ii + " ");
             numbers2.add(ii);
         }
 
         for (int i= 1; i< 15; i++){
             for (int ii= 0; ii< i; ii++){
                 if (numbers2.get(i)< numbers2.get(ii)){
-                    int j = numbers2.get(i);
+                    int iii = numbers2.get(i);
                     numbers2.set(i, numbers2.get(ii));
-                    numbers2.set(ii, j);
+                    numbers2.set(ii, iii);
                 }
             }
         }
 
-        System.out.println("Küçükten Büyüğe : " + numbers2);
+        System.out.println("\nKüçükten Büyüğe : \n" + numbers2);
     }
 }
