@@ -7,30 +7,30 @@ public class CAR {
     int cc;
 
     public CAR(String brand, String model, String color, int year, int hp, int cc){
-        this.brand = brand.toUpperCase();
-        this.model = model.toUpperCase();
-        this.color = color.toUpperCase();
+        this.brand = brand;
+        this.model = model;
+        this.color = color;
         this.year = year;
         this.hp = hp;
         this.cc = cc;
     }
 
     public String getBrand() {
-        return brand;
+        return brand.toUpperCase();
     }
     public void setBrand(String brand){
         this.brand = brand.toUpperCase();
     }
 
     public String getModel() {
-        return model;
+        return model.toUpperCase();
     }
     public void setModel(String model){
         this.model = model.toUpperCase();
     }
 
     public String getColor() {
-        return color;
+        return color.toUpperCase();
     }
     public void setColor(String color){
         this.color = color.toUpperCase();
