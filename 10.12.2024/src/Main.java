@@ -2,8 +2,8 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Main {
-    public static void Multiplication(){
-        Scanner scan = new Scanner(System.in);
+    Scanner scan = new Scanner(System.in);
+    public void Multiplication(){
 
         System.out.println("How many numbers do you want to add?");
         int manyNumber = scan.nextInt();
@@ -23,8 +23,7 @@ public class Main {
         System.out.println("The multiplication of the numbers you entered is : " + numbers[0]);
     }
 
-    public static void Marks() {
-        Scanner scan = new Scanner(System.in);
+    public void Marks() {
         ArrayList<Integer> markList = new ArrayList<>();
 
         System.out.println("What is your first mark?");
@@ -68,8 +67,7 @@ public class Main {
         }
     }
 
-    public static void MoreMarks(ArrayList<Integer> markList){
-        Scanner scan = new Scanner(System.in);
+    public void MoreMarks(ArrayList<Integer> markList){
 
         System.out.println("How many marks do you want to add?");
         int moreMarks = scan.nextInt();
@@ -104,8 +102,7 @@ public class Main {
         System.out.println(markList);
     }
 
-    public static void MarkCalc(){
-        Scanner scan = new Scanner(System.in);
+    public void MarkCalc(){
 
         System.out.println("Enter you vize mark.");
         int Vize  = scan.nextInt();

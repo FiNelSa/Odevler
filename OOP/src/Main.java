@@ -15,7 +15,7 @@ public class Main {
         System.out.println("Do you want to add a car?");
         boolean i = scan.nextBoolean();
         if (i){
-            CAR userCar = new CAR(null, null, null, 0, 0, 0);
+            CAR userCar = new CAR();
             System.out.println("Arabanın markasını giriniz?");
             String brand = scan.next();
             userCar.setBrand(brand);

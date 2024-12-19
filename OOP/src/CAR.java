@@ -14,6 +14,8 @@ public class CAR {
         this.hp = hp;
         this.cc = cc;
     }
+    public CAR(){
+    }
 
     public String getBrand() {
         return brand.toUpperCase();
