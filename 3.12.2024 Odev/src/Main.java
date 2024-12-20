@@ -68,13 +68,17 @@ public class Main {
         }
         System.out.println(numbers2);
 
-        for (int i = 1; i < numbers2.size(); i++){
-            for (int ii = 0; ii < i; ii++){
-                if (numbers2.get(i) < numbers2.get(ii)){
-                    int iii = numbers2.get(i);
-                    numbers2.set(i, numbers2.get(ii));
-                    numbers2.set(ii, iii);
-                }
+        int index = 0;
+        while (index < numbers2.size()){
+            if (index == 0)
+                index++;
+            if (numbers2.get(index)>=numbers2.get(index-1))
+                index++;
+            else{
+                int temp = numbers2.get(index);
+                numbers2.set(index, numbers2.get(index-1));
+                numbers2.set(index-1, temp);
+                index--;
             }
         }
 
