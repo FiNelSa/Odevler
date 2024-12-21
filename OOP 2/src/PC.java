@@ -12,20 +12,19 @@ public class PC {
     int StorageSpeed;
 
     public PC(String GPU, int GPUMemory, String CPU, int CPUSpeed, int CPUMemory, String Motherboard, int RamMemory, int RamSpeed, int RamDDR, int Storage, int StorageSpeed){
-        this.GPU = GPU;
-        this.GPUMemory = GPUMemory;
-        this.CPU = CPU;
-        this.CPUSpeed = CPUSpeed;
-        this.CPUMemory = CPUMemory;
-        this.MotherBoard = Motherboard;
-        this.RamMemory = RamMemory;
-        this.RamSpeed = RamSpeed;
-        this.RamDDR = RamDDR;
-        this.Storage = Storage;
-        this.StorageSpeed = StorageSpeed;
+        this.GPU            = GPU;
+        this.GPUMemory      = GPUMemory;
+        this.CPU            = CPU;
+        this.CPUSpeed       = CPUSpeed;
+        this.CPUMemory      = CPUMemory;
+        this.MotherBoard    = Motherboard;
+        this.RamMemory      = RamMemory;
+        this.RamSpeed       = RamSpeed;
+        this.RamDDR         = RamDDR;
+        this.Storage        = Storage;
+        this.StorageSpeed   = StorageSpeed;
     }
-    public PC(){
-    }
+    public PC(){}
 
     public String getGPU() {
         return GPU.toUpperCase();
