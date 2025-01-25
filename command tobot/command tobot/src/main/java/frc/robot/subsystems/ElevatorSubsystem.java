@@ -12,7 +12,7 @@ public class ElevatorSubsystem {
     private final SparkMax elevatorMotor2 = new SparkMax(5, MotorType.kBrushed);
     private final Encoder EleEncoder1 = new Encoder(4, 5);
     private final Encoder EleEncoder2 = new Encoder(6, 7);
-    private final double kEncoderTick2Meter = 1.0 / 4096.0 * 0.128 * Math.PI;
+    private final double kEncoderTick2Meter = leftEncoder.getPosition()*(Math.PI)*7.12/4.23;
 
     public double getEncoderMeters1() {
         return EleEncoder1.get() * kEncoderTick2Meter;

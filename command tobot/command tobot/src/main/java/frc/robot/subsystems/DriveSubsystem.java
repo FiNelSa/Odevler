@@ -31,8 +31,6 @@ public class DriveSubsystem extends SubsystemBase {
   private final RelativeEncoder leftEncoder = leftMaster.getEncoder();
   private final RelativeEncoder rightEncoder = rightMaster.getEncoder();
 
-  private final double kEncoderTick2Meter = leftEncoder.getPosition()*(Math.PI)*7.12/4.23;
-
   MotorControllerGroup leftMotorControllerGroup = new MotorControllerGroup(leftMaster, leftSlave);
   MotorControllerGroup rightMotorControllerGroup = new MotorControllerGroup(rightMaster,rightSlave);
 
