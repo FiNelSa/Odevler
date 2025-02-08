@@ -9,13 +9,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.commands.Autos;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.DropperSubsystem;
-import org.photonvision.PhotonCamera;
-import org.photonvision.targeting.PhotonPipelineResult;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-  private final ShuffleboardTab autoTab;
+  private final ShuffleboardTab fieldTab;
 
   private final CommandXboxController joy1 = new CommandXboxController(0);
 
@@ -23,13 +20,16 @@ public class RobotContainer {
 
   private final DriveSubsystem m_robotDrive = new DriveSubsystem();
   private final DropperSubsystem m_robotDropper = new DropperSubsystem();
-  
+
   public RobotContainer() {
-    autoTab = Shuffleboard.getTab("Auto");
+    fieldTab = Shuffleboard.getTab("Field");
 
     configureBindings();
-    autoChooser.setDefaultOption("Autonomous", Autos.exampleAuto(m_robotDrive));
-    SmartDashboard.putData("Auto Mode", autoChooser);
+
+    fieldTab.add("Left Speed", m_robotDrive.getLeftRoad()).withSize(2, 1).withPosition(0, 0);
+    fieldTab.add("Right Speed", m_robotDrive.getRightRoad()).withSize(2, 1).withPosition(2, 0);
+
+    fieldTab.add("Roller Speed", m_robotDropper.getDropWay()).withSize(2, 1).withPosition(0, 1);
 
     m_robotDrive.setDefaultCommand(
         m_robotDrive.driveArcade(
