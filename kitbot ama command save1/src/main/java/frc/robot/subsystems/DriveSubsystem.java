@@ -5,20 +5,26 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
+import com.kauailabs.navx.frc.AHRS;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
+
+import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -26,26 +32,39 @@ import frc.robot.commands.Autos;
 import frc.robot.subsystems.DropperSubsystem;
 import org.littletonrobotics.junction.Logger;
 
+
 public class DriveSubsystem extends SubsystemBase {
+    //Motors
     private final SparkMax leftMaster;
     private final SparkMax leftSlave;
     private final SparkMax rightMaster;
     private final SparkMax rightSlave;
 
-    private final DifferentialDrive m_Drive;
+    //Robot's Drive
+    public final DifferentialDrive m_Drive;
 
+    //JoyStick
+    private Joystick joy1 = new Joystick(0);
+
+    //Encoders
     private final RelativeEncoder leftRelativeEncoder;
     private final RelativeEncoder rightRelativeEncoder;
+
+    //NavX Sensor
+    private final AHRS navX = new AHRS(Port.kMXP);
+
+    //Odometry for tracking robot's location
+    private final DifferentialDriveOdometry odometry;
+    private Field2d field = new Field2d();
+    private Pose2d currentPose;
+
+    //Datas we will use
     private double leftRoad;
     private double rightRoad;
-    
-    private Rotation2d gyroAngle;
-    private final ShuffleboardTab driveTab;
 
-    private Pose2d pose = new Pose2d();
-
+    //Supresses useless warnings
+    @SuppressWarnings("removal")
     public DriveSubsystem() {
-        Constants cons = new Constants();
 
         leftMaster = new SparkMax(0, MotorType.kBrushed);
         leftSlave = new SparkMax(1, MotorType.kBrushed);
@@ -57,10 +76,6 @@ public class DriveSubsystem extends SubsystemBase {
 
         leftRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(leftRelativeEncoder.getPosition());
         rightRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(rightRelativeEncoder.getPosition());
-
-        gyroAngle = new Rotation2d((rightRoad - leftRoad) / 0.64);
-
-        driveTab = Shuffleboard.getTab("Drive");
 
         final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMaster, leftSlave);
         final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMaster, rightSlave);
@@ -85,15 +100,27 @@ public class DriveSubsystem extends SubsystemBase {
         config.follow(rightMaster);
         rightSlave.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
+        odometry = new DifferentialDriveOdometry(navX.getRotation2d(), 0, 0);
+        SmartDashboard.putData("Field", field);
+
     }
 
+    //Updates robot's location on the field
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Drive/Left Encoder", leftRelativeEncoder.getPosition());
-        SmartDashboard.putNumber("Drive/Right Encoder", rightRelativeEncoder.getPosition());
+        
+            leftRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(leftRelativeEncoder.getPosition());
+            rightRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(rightRelativeEncoder.getPosition());
 
-        SmartDashboard.putNumber("Drive/Left Speed", leftRelativeEncoder.getVelocity());
-        SmartDashboard.putNumber("Drive/Right Speed", rightRelativeEncoder.getVelocity());
+            currentPose = odometry.update(navX.getRotation2d(), leftRoad, rightRoad);
+            field.setRobotPose(currentPose);
+            SmartDashboard.putNumber("Left Encoder", leftRoad);
+            SmartDashboard.putNumber("Right Encoder", rightRoad);
+            SmartDashboard.putNumber("NavX Rotation", navX.getRotation2d().getDegrees());
+
+            SmartDashboard.putNumber("Joystick X", joy1.getRawAxis(1));
+            SmartDashboard.putNumber("Joystick Y", joy1.getRawAxis(4));
+
     }
 
     public Command driveArcade(
@@ -108,7 +135,27 @@ public class DriveSubsystem extends SubsystemBase {
     public double getRightRoad() {
         return rightRoad;
     }
-    public Rotation2d getGyroAngle() {
-        return gyroAngle;
+
+    public void resetEncoders() {
+        leftRelativeEncoder.setPosition(0);
+        rightRelativeEncoder.setPosition(0);
     }
+    public void resetSensors() {
+        resetEncoders();
+        resetNavX();
+    }
+    public void resetNavX() {
+        navX.reset();
+    }
+
+    public double getHeading() {
+        return navX.getRotation2d().getDegrees();
+    }
+    public double getTurnRate() {
+        return -navX.getRate();
+    }
+    public double getYaw() {
+        return navX.getYaw();
+    }
+
 }

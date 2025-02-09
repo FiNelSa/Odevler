@@ -13,6 +13,5 @@ public final class Constants {
       return WheelPerimeter*GearRatio*encoderPosition;
     }
 
-    
   }
 }

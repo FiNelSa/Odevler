@@ -1,35 +1,32 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.cscore.UsbCamera;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.Autos;
 import frc.robot.subsystems.DriveSubsystem;
 import frc.robot.subsystems.DropperSubsystem;
-import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-  private final ShuffleboardTab fieldTab;
+  CommandXboxController joy1 = new CommandXboxController(0);
 
-  private final CommandXboxController joy1 = new CommandXboxController(0);
+  SendableChooser<Command> autoChooser = new SendableChooser<>();
 
-  private final SendableChooser<Command> autoChooser = new SendableChooser<>();
+  DriveSubsystem m_robotDrive = new DriveSubsystem();
+  DropperSubsystem m_robotDropper = new DropperSubsystem();
 
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-  private final DropperSubsystem m_robotDropper = new DropperSubsystem();
+  UsbCamera frontCam;
+  UsbCamera rearCam;
 
   public RobotContainer() {
-    fieldTab = Shuffleboard.getTab("Field");
 
+    frontCam = CameraServer.startAutomaticCapture(0);
+    rearCam = CameraServer.startAutomaticCapture(1);
+    
     configureBindings();
-
-    fieldTab.add("Left Speed", m_robotDrive.getLeftRoad()).withSize(2, 1).withPosition(0, 0);
-    fieldTab.add("Right Speed", m_robotDrive.getRightRoad()).withSize(2, 1).withPosition(2, 0);
-
-    fieldTab.add("Roller Speed", m_robotDropper.getDropWay()).withSize(2, 1).withPosition(0, 1);
 
     m_robotDrive.setDefaultCommand(
         m_robotDrive.driveArcade(
