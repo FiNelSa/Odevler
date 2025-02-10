@@ -1,44 +1,34 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.Drive;
 
 import java.util.function.DoubleSupplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.revrobotics.spark.SparkMax;
-import com.kauailabs.navx.frc.AHRS;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import edu.wpi.first.wpilibj.ADXRS450_Gyro;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.RobotBase;
-import edu.wpi.first.wpilibj.I2C.Port;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.MotorControllerGroup;
 import com.revrobotics.spark.SparkBase.PersistMode;
-
-import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.DifferentialDriveKinematics;
 import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
-import edu.wpi.first.util.sendable.Sendable;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
-import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
-import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
-import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
-import edu.wpi.first.wpilibj.simulation.EncoderSim;
+import frc.robot.Constants.OperatorConstants.AutoConstants;
+import frc.robot.Constants.OperatorConstants.DriveConstants;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import frc.robot.commands.Autos;
-import frc.robot.subsystems.DropperSubsystem;
-import org.littletonrobotics.junction.Logger;
-
 
 public class DriveSubsystem extends SubsystemBase {
+    
+    //Joystick
+    private final Joystick joy1 = new Joystick(0);
+
     //Motors
     private final SparkMax leftMaster;
     private final SparkMax leftSlave;
@@ -48,64 +38,70 @@ public class DriveSubsystem extends SubsystemBase {
     //Robot's Drive
     public final DifferentialDrive m_Drive;
 
-    //JoyStick
-    private Joystick joy1 = new Joystick(0);
-
     //Encoders
-    private final Encoder leftEncoder;
-    private final Encoder rightEncoder;
-
-    private final EncoderSim leftSimEncoder;
-    private final EncoderSim rightSimEncoder;
-    
-    private Rotation2d gyroAngle;
+    final Encoder leftEncoder;
+    final Encoder rightEncoder;
 
     //NavX Sensor
-    private final AHRS navX = new AHRS(Port.kMXP);
+    private final ADXRS450_Gyro navX = new ADXRS450_Gyro();
 
-    //Odometry for tracking robot's location
-    private final DifferentialDriveOdometry odometry;
-
-    final DifferentialDrivetrainSim driveSim;
     private Field2d field = new Field2d();
     private Pose2d currentPose;
 
     //Datas we will use
     private double leftRoad;
     private double rightRoad;
-    
+
     private double leftSimRoad;
     private double rightSimRoad;
+
+    private final DifferentialDriveOdometry odometry;
+    private final DifferentialDriveKinematics kinematics = new DifferentialDriveKinematics(DriveConstants.TrackWidthMeters);
+    private final PIDController xPidController = new PIDController(AutoConstants.PXController, AutoConstants.IXController, AutoConstants.DXController);
+    private final PIDController yawPidController = new PIDController(AutoConstants.PYawController, AutoConstants.IYawController, AutoConstants.DYawController);
 
     //Supresses useless warnings
     @SuppressWarnings("removal")
     public DriveSubsystem() {
+        resetSensors();
 
-        leftMaster = new SparkMax(0, MotorType.kBrushed);
-        leftSlave = new SparkMax(1, MotorType.kBrushed);
-        rightMaster = new SparkMax(2, MotorType.kBrushed);
-        rightSlave = new SparkMax(3, MotorType.kBrushed);
+        //Defining motors
+        leftMaster = new SparkMax(DriveConstants.LeftMotor1Port, MotorType.kBrushed);
+        leftSlave = new SparkMax(DriveConstants.LeftMotor2Port, MotorType.kBrushed);
+        rightMaster = new SparkMax(DriveConstants.RightMotor1Port, MotorType.kBrushed);
+        rightSlave = new SparkMax(DriveConstants.RightMotor2Port, MotorType.kBrushed);
 
-        leftEncoder = new Encoder(0, 1); 
-        rightEncoder = new Encoder(2, 3);
+        //Defining encoders
+        leftEncoder = new Encoder(
+            DriveConstants.LeftEncoderPorts[0],
+            DriveConstants.LeftEncoderPorts[1],
+            DriveConstants.LeftEncoderInverted); 
+        rightEncoder = new Encoder(
+            DriveConstants.RightEncoderPorts[0],
+            DriveConstants.RightEncoderPorts[1],
+            DriveConstants.RightEncoderInverted); 
 
-        leftSimEncoder = new EncoderSim(leftEncoder);
-        rightSimEncoder = new EncoderSim(rightEncoder);
+        //Setting distance per pulse
+        leftEncoder.setDistancePerPulse(DriveConstants.EncoderDistancePerPulse);
+        rightEncoder.setDistancePerPulse(DriveConstants.EncoderDistancePerPulse);
+
+        //Odometry for tracking robot's location
+        odometry = 
+        new DifferentialDriveOdometry(
+            Rotation2d.fromDegrees(getHeading()),
+            leftEncoder.getDistance(), 
+            rightEncoder.getDistance());
+
+        field = new Field2d();
+        SmartDashboard.putData("Field", field);
 
         leftRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(leftEncoder.get());
         rightRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(rightEncoder.get());
-
-        leftSimRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(leftSimEncoder.getDistance());
-        rightSimRoad = frc.robot.Constants.OperatorConstants.getTotalRoad(rightSimEncoder.getDistance());
 
         final MotorControllerGroup leftMotors = new MotorControllerGroup(leftMaster, leftSlave);
         final MotorControllerGroup rightMotors = new MotorControllerGroup(rightMaster, rightSlave);
 
         m_Drive = new DifferentialDrive(leftMotors, rightMotors);
-
-       if (RobotBase.isSimulation()){
-
-       }
 
         leftMaster.setCANTimeout(250);
         leftSlave.setCANTimeout(250);
@@ -125,32 +121,35 @@ public class DriveSubsystem extends SubsystemBase {
         config.follow(rightMaster);
         rightSlave.configure(config, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        odometry = new DifferentialDriveOdometry(navX.getRotation2d(), getLeftSimRoad(), getLeftSimRoad());
-        SmartDashboard.putData("Field", field);
-
     }
 
     //Updates robot's location on the field
     @Override
     public void periodic() {
-        currentPose = odometry.update(navX.getRotation2d(), getLeftSimRoad(), getRightSimRoad());
-        field.setRobotPose(currentPose);
-        SmartDashboard.putNumber("Left Encoder", getLeftSimRoad());
-        SmartDashboard.putNumber("Right Encoder", getRightSimRoad());
-        SmartDashboard.putNumber("NavX Rotation", navX.getRotation2d().getDegrees());
-
-        SmartDashboard.putNumber("Joystick 1. Axis", joy1.getRawAxis(1));
-        SmartDashboard.putNumber("Joystick 4. Axis", joy1.getRawAxis(4));
-    }
-
-    public void simulationPeriodic() {
-
+        odometry.update(
+            Rotation2d.fromDegrees(getHeading()),
+            leftEncoder.getDistance(),
+            rightEncoder.getDistance());
+        field.setRobotPose(getPose());
+        //System.out.print("RED :"+getPose().getRotation().getDegrees());
+        //System.out.println("BLUE :"+getAngleCalculationForBlue());
+        SmartDashboard.putNumber("Axis 1", joy1.getRawAxis(1));
+        SmartDashboard.putNumber("Axis 4", joy1.getRawAxis(4));
     }
 
     public Command driveArcade(
         DriveSubsystem driveSubsystem, DoubleSupplier xSpeed, DoubleSupplier zRotation) {
-    return Commands.run(
-        () -> m_Drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()), driveSubsystem);
+        return Commands.run(
+            () -> m_Drive.arcadeDrive(xSpeed.getAsDouble(), zRotation.getAsDouble()), driveSubsystem);
+    }
+
+    public void resetOdometry(Pose2d pose) {
+        resetEncoders();
+        odometry.resetPosition(
+            Rotation2d.fromDegrees(pose.getRotation().getDegrees()),
+            leftEncoder.getDistance(),
+            rightEncoder.getDistance(),
+            pose);
     }
 
     public double getLeftRoad() {
@@ -165,13 +164,12 @@ public class DriveSubsystem extends SubsystemBase {
     public double getRightSimRoad() {
         return rightSimRoad;
     }
-
+ 
     public void resetEncoders() {
         leftEncoder.reset();
         rightEncoder.reset();
     }
     public void resetSensors() {
-        resetEncoders();
         resetNavX();
     }
     public void resetNavX() {
@@ -185,7 +183,12 @@ public class DriveSubsystem extends SubsystemBase {
         return -navX.getRate();
     }
     public double getYaw() {
-        return navX.getYaw();
+        return navX.getAngle();
     }
-
+    public Pose2d getPose() {
+        return odometry.getPoseMeters();
+    }
+    public double getAngleCalculationForBlue(){
+        return (getHeading() + 360) % 360;
+    }
 }
