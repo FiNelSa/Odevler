@@ -5,8 +5,6 @@
 package frc.robot.commands;
 
 import frc.robot.subsystems.DriveSubsystem;
-
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
@@ -19,14 +17,12 @@ public class Drive extends Command {
   double speed;
   double error;
 
-  private final Timer timer = new Timer();
-
   public Drive(DriveSubsystem driveSubsystem, Double line) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveSubsystem = driveSubsystem;
   
     this.line = line;
-    error = line/3;
+    error = line/2;
 
     addRequirements(driveSubsystem);
   }
@@ -35,8 +31,6 @@ public class Drive extends Command {
   @Override
   public void initialize() {
     speed = 1;
-    timer.reset();
-    timer.start();
     oldRoad = driveSubsystem.getRoad();
   }
 
@@ -45,11 +39,10 @@ public class Drive extends Command {
   public void execute() {
     takenRoad = driveSubsystem.getRoad()-oldRoad;
     System.out.println("Road: " + takenRoad);
-    driveSubsystem.arcadeDrive(1, 0); 
+    driveSubsystem.arcadeDrive(speed, 0); 
     if (takenRoad >= error) {
       error = error * 3 / 2;
-      speed = speed / 2;
-      driveSubsystem.arcadeDrive(0, 0);
+      speed = speed * 2 / 3;
     }
   }
 

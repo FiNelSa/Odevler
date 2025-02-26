@@ -26,9 +26,9 @@ public class Go2Target extends Command {
   double width;
   double goY;
   double goX;
-  public double go;
+  public double line;
 
-  /** Creates a new Turn2Target. */
+  /** Creates a new Go2Target. */
   public Go2Target(DriveSubsystem driveSubsystem,  Pose2d targetPose) {
     this.driveSubsystem =  driveSubsystem;
     this.targetPose =  targetPose;
@@ -64,8 +64,8 @@ public class Go2Target extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    go = Math.sqrt(goX*goX + goY*goY);
-    new Drive(driveSubsystem, go).schedule();;
+    line = Math.sqrt(goX*goX + goY*goY);
+    new Drive(driveSubsystem, line).schedule();
   }
 
   // Returns true when the command should end.
@@ -74,7 +74,7 @@ public class Go2Target extends Command {
     return turnPid.atSetpoint();  
   }
 
-  public double getGo() {
-    return go;
+  public double getLine() {
+    return line;
   }
 }

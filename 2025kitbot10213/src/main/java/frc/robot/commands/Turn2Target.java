@@ -26,7 +26,7 @@ public class Turn2Target extends Command {
   double width;
   double goY;
   double goX;
-  public double go;
+  public double line;
 
   /** Creates a new Turn2Target. */
   public Turn2Target(DriveSubsystem driveSubsystem,  Pose2d targetPose) {
@@ -64,8 +64,8 @@ public class Turn2Target extends Command {
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    go = Math.sqrt(goX*goX + goY*goY);
-    System.out.println("road = " + go);
+    line = Math.sqrt(goX*goX + goY*goY);
+    System.out.println("road = " + line);
   }
 
   // Returns true when the command should end.
@@ -74,7 +74,7 @@ public class Turn2Target extends Command {
     return turnPid.atSetpoint();  
   }
 
-  public double getGo() {
-    return go;
+  public double getLine() {
+    return line;
   }
 }

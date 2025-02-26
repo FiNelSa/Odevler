@@ -16,7 +16,6 @@ import edu.wpi.first.math.util.Units;
 
 public final class Constants {
   public static final class DriveConstants {
-    public static final Pose2d targetPose = new Pose2d(5, 5, new Rotation2d(0));
     public static final int LeftMotor1Port = 0;
     public static final int LeftMotor2Port = 1;
     public static final int RightMotor1Port = 2;
@@ -86,6 +85,9 @@ public final class Constants {
   }
 
   public static final class FieldConstants{
+    public static final Pose2d CoralTurn = new Pose2d(4.5, 4, new Rotation2d(0));
+    public static final Pose2d CoralDrop = new Pose2d(3, 4, new Rotation2d(0));
+
     public static final Pose2d BLUE_SUB_WOOFER = new Pose2d(new Translation2d(0, 5.60), new Rotation2d(Math.toRadians(180)));
     public static final Pose2d RED_SUB_WOOFER = new Pose2d(new Translation2d(16.5, 5.60), new Rotation2d(Math.toRadians(0)));
   }

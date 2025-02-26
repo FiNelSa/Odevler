@@ -4,7 +4,7 @@
 
 package frc.robot;
 
-import frc.robot.Constants.DriveConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.OIConstants;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -64,9 +64,11 @@ public class RobotContainer {
     new JoystickButton(xboxController, XboxController.Button.kA.value)
         .onTrue(new Drive(m_driveSubsystem, 5.0));
     new JoystickButton(xboxController, XboxController.Button.kB.value)
-        .onTrue(new Turn2Target(m_driveSubsystem, DriveConstants.targetPose));     
+        .onTrue(new Turn2Target(m_driveSubsystem, FieldConstants.CoralTurn));
     new JoystickButton(xboxController, XboxController.Button.kY.value)
-        .onTrue(new Go2Target(m_driveSubsystem, DriveConstants.targetPose));
+        .onTrue(new Go2Target(m_driveSubsystem, FieldConstants.CoralDrop));
+    new JoystickButton(xboxController, XboxController.Button.kX.value)
+        .onTrue(new DropperCommand(() -> 1, () -> 0, m_DropperSubsystem));
   }
 
   public DriveSubsystem getDriveSubsystem() {

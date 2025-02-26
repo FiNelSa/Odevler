@@ -29,9 +29,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
-    double line;
-
-    double road;
 
     //Defining joystick and motors
     XboxController xboxController = new XboxController(0);
@@ -78,6 +75,7 @@ public class DriveSubsystem extends SubsystemBase {
     public EncoderSim rightEncoderSim;
     private final Field2d field;
     private final ADXRS450_GyroSim gyroSim;
+    double road;
 
     double currentAngle = 0;
 
@@ -137,9 +135,6 @@ public class DriveSubsystem extends SubsystemBase {
     @Override
     //Runs the code inside every 20ms
     public void periodic() {
-        Pose2d targetPose = DriveConstants.targetPose;
-        line = (targetPose.getX()*targetPose.getX())+(targetPose.getY()*targetPose.getY());
-
         //Updates the odometry
         pose = odometry.update(
             Rotation2d.fromDegrees(getHeading()), 
@@ -248,9 +243,5 @@ public class DriveSubsystem extends SubsystemBase {
 
     public double getRoad(){
         return road;
-    }
-
-    public double getLine() {
-        return line;
     }
 }
