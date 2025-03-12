@@ -4,77 +4,70 @@
 
 package frc.robot.commands;
 
-
-import edu.wpi.first.math.controller.PIDController;
+import frc.robot.subsystems.DriveSubsystem;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.AutoConstants;
-import frc.robot.subsystems.DriveSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class Go2Target extends Command {
 
-  DriveSubsystem driveSubsystem;
-  private Pose2d targetPose;  
-  private Pose2d currentPose;
-  private double angle;
-  private double currentAngle;
-
-  public PIDController turnPid = new PIDController(AutoConstants.PTurnController, AutoConstants.ITurnController, AutoConstants.DTurnController);
-  
-  double height;
-  double width;
-  double goY;
-  double goX;
-  public double line;
+  private final DriveSubsystem m_DriveSubsystem;
+  private Pose2d targetPose;
+  private double goX;
+  private double goY;
+  private double oldRoad;
+  private double takenRoad;
+  private double line;
+  private double error;
+  private double speed;
 
   /** Creates a new Go2Target. */
-  public Go2Target(DriveSubsystem driveSubsystem,  Pose2d targetPose) {
-    this.driveSubsystem =  driveSubsystem;
-    this.targetPose =  targetPose;
+  public Go2Target(DriveSubsystem driveSubsystem, Pose2d targetpose) {
+
+    this.m_DriveSubsystem = driveSubsystem;
+    this.targetPose = targetpose;
 
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(driveSubsystem);
+    addRequirements(m_DriveSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    turnPid.setTolerance(1);
+    speed = 1;
+    oldRoad = m_DriveSubsystem.getRoad();
+
+    goX = targetPose.getX() - m_DriveSubsystem.getPose().getX();
+    goY = targetPose.getY() - m_DriveSubsystem.getPose().getY();
+    line = Math.hypot(goX, goY);
+    System.out.println("line = " + line);
+    error = line*2/3;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    currentPose = driveSubsystem.getPose();
 
-    goY = targetPose.getY() - currentPose.getY();
-    goX = targetPose.getX() - currentPose.getX();
+    takenRoad = m_DriveSubsystem.getRoad() - oldRoad;
 
-    currentAngle = driveSubsystem.getHeading();
-    
-    angle = Math.toDegrees(Math.atan2(goY, goX));
-    
-    turnPid.setSetpoint(angle);
+    m_DriveSubsystem.arcadeDrive(speed, 0);
 
-    double output = turnPid.calculate(currentAngle);
-    driveSubsystem.arcadeDrive(0, output);
+    if(takenRoad >= error){
+      speed = speed*2/3;
+      error = error*3/2;
+    }
+
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    line = Math.sqrt(goX*goX + goY*goY);
-    new Drive(driveSubsystem, line).schedule();
+    m_DriveSubsystem.arcadeDrive(0, 0);
   }
 
   // Returns true when the command should end.
   @Override
-  public boolean isFinished() { 
-    return turnPid.atSetpoint();  
-  }
-
-  public double getLine() {
-    return line;
+  public boolean isFinished() {
+    return takenRoad >= line;
   }
 }

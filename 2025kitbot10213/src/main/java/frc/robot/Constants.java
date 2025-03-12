@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.config.RobotConfig;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -15,6 +17,7 @@ import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.math.util.Units;
 
 public final class Constants {
+  public static RobotConfig robotConfig = new RobotConfig(70, 10, null, null);
   public static final class DriveConstants {
     public static final int LeftMotor1Port = 0;
     public static final int LeftMotor2Port = 1;

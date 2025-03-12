@@ -31,4 +31,8 @@ public class DropperSubsystem extends SubsystemBase {
   public void rundropper(double forward, double reverse) {
     dropMotor.set(forward - reverse);
   }
+
+  public double getRoad(){
+    return dropEncoder.getDistance();
+  }
 }

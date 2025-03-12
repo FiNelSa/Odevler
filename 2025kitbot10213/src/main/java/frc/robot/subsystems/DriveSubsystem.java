@@ -1,8 +1,16 @@
 package frc.robot.subsystems;
 
+import java.io.ObjectInputFilter.Config;
+
 //Importing libraries
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPLTVController;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -14,6 +22,7 @@ import edu.wpi.first.math.kinematics.DifferentialDriveOdometry;
 import edu.wpi.first.math.kinematics.DifferentialDriveWheelSpeeds;
 import edu.wpi.first.util.sendable.SendableRegistry;
 import edu.wpi.first.wpilibj.ADXRS450_Gyro;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.RobotController;
@@ -26,6 +35,8 @@ import edu.wpi.first.wpilibj.simulation.DifferentialDrivetrainSim;
 import edu.wpi.first.wpilibj.simulation.EncoderSim;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class DriveSubsystem extends SubsystemBase {
@@ -75,7 +86,11 @@ public class DriveSubsystem extends SubsystemBase {
     public EncoderSim rightEncoderSim;
     private final Field2d field;
     private final ADXRS450_GyroSim gyroSim;
+
     double road;
+    double goX;
+    double goY;
+    double line;
 
     double currentAngle = 0;
 
@@ -130,6 +145,36 @@ public class DriveSubsystem extends SubsystemBase {
             gyroSim = null;
             field = null;
         }
+
+        RobotConfig config = null;
+    try{
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      // Handle exception as needed
+      e.printStackTrace();
+    }
+
+    // Configure AutoBuilder last
+    AutoBuilder.configure(
+            this::getPose, // Robot pose supplier
+            this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+            this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
+            new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
+            config, // The robot configuration
+            () -> {
+              // Boolean supplier that controls when the path will be mirrored for the red alliance
+              // This will flip the path being followed to the red side of the field.
+              // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+              var alliance = DriverStation.getAlliance();
+              if (alliance.isPresent()) {
+                return alliance.get() == DriverStation.Alliance.Red;
+              }
+              return false;
+            },
+            this // Reference to this subsystem to set requirements
+    );
   }
 
     @Override
@@ -163,6 +208,7 @@ public class DriveSubsystem extends SubsystemBase {
 
         //Sets simulation gyro's angle
         gyroSim.setAngle(-driveTrainSim.getHeading().getDegrees());
+        
     }
 
     SlewRateLimiter outputYLimiter = new SlewRateLimiter(1);
@@ -188,6 +234,17 @@ public class DriveSubsystem extends SubsystemBase {
         yawPidController.setSetpoint(speeds.omegaRadiansPerSecond);
 
         m_drive.arcadeDrive(xPidController.calculate(getChassisSpeeds().vxMetersPerSecond), yawPidController.calculate(getChassisSpeeds().omegaRadiansPerSecond));
+    }
+
+    public void driveRobotRelative(ChassisSpeeds speeds) {
+
+        m_drive.feed();
+        
+        xPidController.setSetpoint(speeds.vxMetersPerSecond);
+        yawPidController.setSetpoint(speeds.omegaRadiansPerSecond);
+
+        m_drive.arcadeDrive(speeds.vxMetersPerSecond, speeds.omegaRadiansPerSecond);
+        
     }
 
     public void tankDriveVolts(double leftVolts, double rightVolts) {
@@ -231,6 +288,14 @@ public class DriveSubsystem extends SubsystemBase {
         return odometry.getPoseMeters();
     }
 
+    public void resetPose(Pose2d pose) {
+        odometry.resetPosition(
+            Rotation2d.fromDegrees(pose.getRotation().getDegrees()),
+            leftEncoder.getDistance(),
+            rightEncoder.getDistance(),
+            pose);
+    }
+
     //Resets the encoders
     public void resetEncoders() {
         leftEncoder.reset();
@@ -244,4 +309,42 @@ public class DriveSubsystem extends SubsystemBase {
     public double getRoad(){
         return road;
     }
+
+    public double getGo(Pose2d targetPose) {
+        goX = targetPose.getX()-pose.getX();
+        goY = targetPose.getY()-pose.getY();
+        line = Math.hypot(goX, goY);
+        return line;
+    }
+
+    public Command followPathCommand(String pathName) {
+        try{
+            PathPlannerPath path = PathPlannerPath.fromPathFile(pathName);
+    
+            return new FollowPathCommand(
+                    path,
+                    this::getPose, // Robot pose supplier
+                    this::getRobotRelativeSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+                    this::drive, // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds, AND feedforwards
+                    new PPLTVController(0.02), // PPLTVController is the built in path following controller for differential drive trains
+                    config, // The robot configuration
+                    () -> {
+                      // Boolean supplier that controls when the path will be mirrored for the red alliance
+                      // This will flip the path being followed to the red side of the field.
+                      // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+    
+                      var alliance = DriverStation.getAlliance();
+                      if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                      }
+                      return false;
+                    },
+                    this // Reference to this subsystem to set requirements
+            );
+        } catch (Exception e) {
+            DriverStation.reportError("Big oops: " + e.getMessage(), e.getStackTrace());
+            return Commands.none();
+        }
+      }
+
 }

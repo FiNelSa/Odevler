@@ -14,15 +14,15 @@ public class Drive extends Command {
   double line;
   double oldRoad;
   double takenRoad;
-  double speed;
   double error;
+  double speed;
 
   public Drive(DriveSubsystem driveSubsystem, Double line) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.driveSubsystem = driveSubsystem;
   
     this.line = line;
-    error = line/2;
+    error = line*2/3;
 
     addRequirements(driveSubsystem);
   }
